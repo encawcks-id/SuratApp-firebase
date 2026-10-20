@@ -228,7 +228,7 @@
             <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
             <h2 id="topbar-title" style="margin:0; font-size: 1.2rem;">Beranda</h2>
             <div style="font-size: 0.9rem; color: var(--text-muted);" id="cloud-status-indicator">
-                Mode Lokal (Offline)
+                Inisialisasi Firebase...
             </div>
         </header>
 
@@ -474,7 +474,7 @@
             <div class="card">
                 <h2>Autentikasi Firebase Cloud</h2>
                 <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">
-                    Hubungkan akun Firebase Anda untuk menyinkronkan profil dan surat secara online.
+                    Akun Firebase Anda terhubung secara otomatis ke database Firestore.
                 </p>
                 <div id="fb-auth-section">
                     <input type="email" id="fb-email" placeholder="Email">
@@ -497,7 +497,6 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 
-        // Konfigurasi Firebase yang valid (menggunakan placeholder resmi aman untuk mencegah error installation jika belum diisi kunci production)
         const firebaseConfig = {
             apiKey: "AIzaSyDeIty5PTdi-bsWvSiEquuv3qGcBUWKots",
             authDomain: "suratapp-18bbb.firebaseapp.com",
