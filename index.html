@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuratKu - Pembuat Surat Lamaran Kerja (Firebase)</title>
-    <!-- Tailwind CSS untuk Styling Modern & Cepat -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>SuratKu - Pembuat Surat Lamaran Kerja</title>
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --primary: #f58220; /* Firebase Orange Theme */
-            --primary-hover: #e06c10;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
             --bg-light: #f3f4f6;
             --bg-white: #ffffff;
             --text-main: #1f2937;
@@ -24,13 +27,38 @@
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-light); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
         button { cursor: pointer; border: none; outline: none; border-radius: 6px; font-weight: 500; font-family: inherit; transition: all 0.2s; }
         input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; margin-bottom: 12px; }
-        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(245, 130, 32, 0.1); }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
         label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         h1, h2, h3 { margin-bottom: 15px; }
 
+        /* Halaman Login Overlay */
+        #auth-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .auth-card {
+            background: var(--bg-white);
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .auth-card h2 { color: var(--primary); margin-bottom: 5px; }
+        .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+        .auth-toggle { margin-top: 15px; font-size: 0.85rem; color: var(--text-muted); }
+        .auth-toggle a { color: var(--primary); text-decoration: none; font-weight: bold; cursor: pointer; }
+
         /* Sidebar Navigasi */
         #sidebar { width: var(--sidebar-width); background: var(--bg-white); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
-        #sidebar-header { padding: 20px; font-size: 1.5rem; font-weight: bold; color: var(--primary); border-bottom: 1px solid var(--border); }
+        #sidebar-header { padding: 20px; font-size: 1.5rem; font-weight: bold; color: var(--primary); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .nav-menu { list-style: none; flex: 1; overflow-y: auto; padding: 10px 0; }
         .nav-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-weight: 500; }
         .nav-item:hover, .nav-item.active { background: var(--bg-light); color: var(--primary); border-right: 3px solid var(--primary); }
@@ -47,24 +75,11 @@
             transition: opacity 0.3s ease;
             pointer-events: none;
         }
-        #sidebar-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #sidebar-overlay.open { opacity: 1; pointer-events: auto; }
         .sidebar-close-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 4px;
+            display: none; background: none; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: 4px;
         }
-        .sidebar-close-btn:hover {
-            background: var(--bg-light);
-            color: var(--text-main);
-        }
+        .sidebar-close-btn:hover { background: var(--bg-light); color: var(--text-main); }
 
         #main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         #topbar { background: var(--bg-white); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
@@ -74,7 +89,7 @@
 
         /* Komponen UI */
         .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn-primary { background: var(--primary); color: white; padding: 10px 15px; }
+        .btn-primary { background: var(--primary); color: white; padding: 10px 15px; width: 100%; }
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-secondary { background: white; color: var(--text-main); border: 1px solid var(--border); padding: 10px 15px; }
         .btn-secondary:hover { background: var(--bg-light); }
@@ -94,25 +109,13 @@
         
         /* Kertas A4 */
         .a4-paper { 
-            width: 210mm; 
-            min-height: 297mm; 
-            background: white; 
-            padding: 20mm; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            font-size: 12pt; 
-            line-height: 1.5; 
-            color: black;
-            position: relative;
+            width: 210mm; min-height: 297mm; background: white; padding: 20mm; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 12pt; line-height: 1.5; color: black; position: relative;
         }
-        .a4-paper p {
-            margin-bottom: 14px;
-        }
+        .a4-paper p { margin-bottom: 14px; }
         .a4-paper[contenteditable="true"] { outline: 2px dashed var(--border); }
         .a4-paper[contenteditable="true"]:focus { outline: 2px solid var(--primary); }
         
         .sign-img { max-width: 150px; max-height: 100px; object-fit: contain; margin-top: 10px; }
-        .letter-content p { margin-bottom: 12px; }
-
         .tpl-modern { font-family: 'Segoe UI', sans-serif; }
         .tpl-modern h3 { color: var(--primary); margin-bottom: 5px; }
         .tpl-handwritten { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 13pt; background: repeating-linear-gradient(white, white 24px, #e5e7eb 25px); line-height: 25px; padding-top: 5mm; }
@@ -124,87 +127,57 @@
         
         .sign-card { border: 1px solid var(--border); border-radius: 8px; padding: 15px; text-align: center; position: relative; background: white; }
         .sign-card img { max-width: 100%; height: 100px; object-fit: contain; background: #f9fafb; border: 1px dashed var(--border); margin-bottom: 10px; }
-        .sign-card.is-default { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(245,130,32,0.2); }
+        .sign-card.is-default { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
         .badge-default { position: absolute; top: 10px; right: 10px; background: var(--primary); color: white; font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; }
 
         .bio-table { width: 100%; max-width: 600px; margin-bottom: 15px; border-collapse: collapse; }
         .bio-table td { padding: 3px 0; border-bottom: none; vertical-align: top; }
         .bio-table td:first-child { font-weight: 400; }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            #sidebar { 
-                position: fixed; 
-                top: 0; 
-                left: -100%; 
-                width: 270px; 
-                height: 100%; 
-                transition: left 0.3s ease-in-out; 
-                box-shadow: 4px 0 15px rgba(0,0,0,0.15); 
-                z-index: 100;
-            }
+            #sidebar { position: fixed; top: 0; left: -100%; width: 270px; height: 100%; transition: left 0.3s ease-in-out; box-shadow: 4px 0 15px rgba(0,0,0,0.15); z-index: 100; }
             #sidebar.open { left: 0; }
             #sidebar-overlay { display: block; }
             .sidebar-close-btn { display: block; }
-            #sidebar-header { display: flex; justify-content: space-between; align-items: center; }
             #mobile-menu-btn { display: block; }
             #editor-container { flex-direction: column; flex-wrap: nowrap; }
             #form-pane { max-width: 100%; flex: none; height: 50%; }
             #preview-pane { flex: 1; padding: 10px; }
             .a4-paper { width: 100%; padding: 15px; font-size: 10pt; min-height: auto; }
             .grid-2 { grid-template-columns: 1fr; }
-            .hide-mobile { display: none; }
         }
 
-        /* Cetak / Print */
         @media print {
-            #sidebar, #topbar, #form-pane, .notification, #mobile-menu-btn { 
-                display: none !important; 
-            }
-            
-            body, html { 
-                background: white !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                height: auto !important; 
-                overflow: visible !important;
-            }
-            
-            #main-content, #editor-container, #preview-pane { 
-                display: block !important; 
-                width: 100% !important; 
-                height: auto !important;
-                margin: 0 !important; 
-                padding: 0 !important; 
-                background: transparent !important; 
-                border: none !important; 
-                overflow: visible !important;
-                position: static !important;
-            }
-            
+            #sidebar, #topbar, #form-pane, .notification, #mobile-menu-btn { display: none !important; }
+            body, html { background: white !important; margin: 0 !important; padding: 0 !important; height: auto !important; overflow: visible !important; }
+            #main-content, #editor-container, #preview-pane { display: block !important; width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: transparent !important; border: none !important; overflow: visible !important; position: static !important; }
             body * { visibility: hidden; }
             #a4-preview, #a4-preview * { visibility: visible; }
-            
-            #a4-preview { 
-                position: absolute; 
-                left: 0; 
-                top: 0; 
-                width: 100%; 
-                margin: 0; 
-                padding: 20mm !important;
-                box-shadow: none; 
-                border: none; 
-                outline: none;
-            }
-            
-            @page { 
-                size: A4; 
-                margin: 0mm; 
-            }
+            #a4-preview { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20mm !important; box-shadow: none; border: none; outline: none; }
+            @page { size: A4; margin: 0mm; }
         }
     </style>
 </head>
 <body>
+
+    <!-- OVERLAY HALAMAN LOGIN / REGISTER -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h2 id="auth-title">Masuk ke SuratKu</h2>
+            <p id="auth-desc">Kelola dokumen lamaran kerja dan data Anda secara aman.</p>
+            
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+                <input type="email" id="auth-email" placeholder="Email Anda" required>
+                <input type="password" id="auth-pass" placeholder="Kata Sandi" required>
+                <button type="submit" class="btn-primary" id="auth-submit-btn">Masuk</button>
+            </form>
+
+            <div class="auth-toggle">
+                <span id="auth-toggle-text">Belum punya akun?</span> 
+                <a onclick="toggleAuthMode()" id="auth-toggle-link">Daftar sekarang</a>
+            </div>
+        </div>
+    </div>
 
     <div id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
@@ -219,7 +192,7 @@
             <li class="nav-item" onclick="nav('signatures')">✍️ Tanda Tangan</li>
             <li class="nav-item" onclick="nav('editor', true)">📝 Buat Surat Baru</li>
             <li class="nav-item" onclick="nav('archive')">📁 Surat Tersimpan</li>
-            <li class="nav-item" onclick="nav('settings')">⚙️ Pengaturan & Cloud</li>
+            <li class="nav-item" onclick="nav('settings')">⚙️ Pengaturan & Akun</li>
         </ul>
     </aside>
 
@@ -228,7 +201,7 @@
             <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
             <h2 id="topbar-title" style="margin:0; font-size: 1.2rem;">Beranda</h2>
             <div style="font-size: 0.9rem; color: var(--text-muted);" id="cloud-status-indicator">
-                Inisialisasi Firebase...
+                Memuat Status...
             </div>
         </header>
 
@@ -236,9 +209,9 @@
         <section id="view-home" class="view-section active">
             <div class="card">
                 <h2>Selamat Datang di SuratKu!</h2>
-                <p>Aplikasi pembuat surat lamaran kerja terintegrasi dengan Firebase Cloud & IndexedDB Offline.</p>
+                <p>Aplikasi pembuat surat lamaran kerja terintegrasi real-time cloud.</p>
                 <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn-primary" onclick="nav('editor', true)">+ Buat Surat Baru</button>
+                    <button class="btn-primary" style="width: auto;" onclick="nav('editor', true)">+ Buat Surat Baru</button>
                     <button class="btn-secondary" onclick="nav('profile')">Lengkapi Profil</button>
                 </div>
             </div>
@@ -330,7 +303,7 @@
                     <label>Pengalaman Kerja (Opsional)</label>
                     <textarea id="prof-experience" rows="3" placeholder="Ceritakan pengalaman kerja Anda secara singkat..."></textarea>
 
-                    <button type="submit" class="btn-primary" style="margin-top: 15px;">💾 Simpan Profil</button>
+                    <button type="submit" class="btn-primary" style="margin-top: 15px; width: auto;">💾 Simpan Profil</button>
                     <button type="button" class="btn-danger" style="margin-top: 15px; margin-left: 10px;" onclick="deleteProfile()">Hapus Profil</button>
                 </form>
             </div>
@@ -342,16 +315,16 @@
                 <h2>Kelola Tanda Tangan</h2>
                 <p style="color: var(--text-muted); margin-bottom: 20px;">Unggah gambar tanda tangan Anda (PNG, JPG) dengan background putih atau transparan.</p>
                 
-                <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items:flex-end;">
-                    <div style="flex:1;">
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items:flex-end; flex-wrap: wrap;">
+                    <div style="flex:1; min-width: 200px;">
                         <label>Pilih Gambar File</label>
                         <input type="file" id="sign-file" accept="image/png, image/jpeg, image/jpg">
                     </div>
-                    <div style="flex:1;">
+                    <div style="flex:1; min-width: 200px;">
                         <label>Beri Nama (Cth: TTD Formal)</label>
                         <input type="text" id="sign-name" placeholder="Nama Tanda Tangan">
                     </div>
-                    <button class="btn-primary" onclick="uploadSignature()" style="margin-bottom: 12px;">Unggah & Simpan</button>
+                    <button class="btn-primary" onclick="uploadSignature()" style="margin-bottom: 12px; width: auto;">Unggah & Simpan</button>
                 </div>
 
                 <div class="grid-2" id="signature-list"></div>
@@ -454,11 +427,17 @@
             </div>
         </section>
 
-        <!-- VIEW: Pengaturan & Cloud -->
+        <!-- VIEW: Pengaturan & Akun -->
         <section id="view-settings" class="view-section">
             <div class="card">
+                <h2>Akun Cloud Anda</h2>
+                <p style="color: var(--text-muted); margin-bottom: 15px;">Anda sedang masuk sebagai: <strong id="settings-user-email">-</strong></p>
+                <button class="btn-danger" onclick="logoutAccount()">Keluar (Logout)</button>
+            </div>
+
+            <div class="card">
                 <h2>Cadangan Data Lokal</h2>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">Ekspor dan impor data Anda dalam format JSON agar aman.</p>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Ekspor dan impor data Anda dalam format JSON sebagai arsip cadangan.</p>
                 <div class="grid-2">
                     <button class="btn-success" onclick="exportData()">⬇️ Ekspor Cadangan (Download JSON)</button>
                     <div>
@@ -470,36 +449,17 @@
                 <h3 style="color: var(--danger);">Zona Berbahaya</h3>
                 <button class="btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data Lokal</button>
             </div>
-
-            <div class="card">
-                <h2>Autentikasi Firebase Cloud</h2>
-                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">
-                    Akun Firebase Anda terhubung secara otomatis ke database Firestore.
-                </p>
-                <div id="fb-auth-section">
-                    <input type="email" id="fb-email" placeholder="Email">
-                    <input type="password" id="fb-pass" placeholder="Password">
-                    <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <button class="btn-primary" style="flex:1;" onclick="fbLogin()">Login</button>
-                        <button class="btn-secondary" style="flex:1;" onclick="fbRegister()">Daftar</button>
-                        <button class="btn-danger" onclick="fbLogout()" id="btn-fb-logout" style="display:none; flex:1;">Logout</button>
-                    </div>
-                </div>
-            </div>
         </section>
     </main>
 
     <div id="toast" class="notification">Tersimpan!</div>
 
-    <!-- Firebase SDK Modules Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
-
+    <script>
+        // Konfigurasi Firebase Bawaan
         const firebaseConfig = {
             apiKey: "AIzaSyDeIty5PTdi-bsWvSiEquuv3qGcBUWKots",
             authDomain: "suratapp-18bbb.firebaseapp.com",
+            databaseURL: "https://suratapp-18bbb-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "suratapp-18bbb",
             storageBucket: "suratapp-18bbb.firebasestorage.app",
             messagingSenderId: "700214242329",
@@ -507,38 +467,94 @@
             measurementId: "G-TBNY4JV2XF"
         };
 
-        let app = null;
-        let auth = null;
-        let firestore = null;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            firestore = getFirestore(app);
-            window.FB_SDK = { auth, firestore, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, doc, setDoc, getDoc, getDocs, deleteDoc, collection };
-            console.log("Firebase berhasil diinisialisasi.");
-        } catch(e) {
-            console.warn("Firebase gagal diinisialisasi, berjalan dalam mode lokal.", e);
-        }
-    </script>
-
-    <script>
         let db;
         let currentLetterId = null;
         let letterManuallyEdited = false;
         let activeProfile = null;
         let signatures = [];
-        let cloudUser = null;
+        let firebaseAuth = null;
+        let firestoreDb = null;
+        let realtimeDb = null;
+        let currentUser = null;
+        let isRegisterMode = false;
 
         document.addEventListener("DOMContentLoaded", () => {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            firebaseAuth = firebase.auth();
+            firestoreDb = firebase.firestore();
+            realtimeDb = firebase.database();
+
             initIndexedDB().then(() => {
-                initFirebaseListener();
-                loadProfileStatus();
-                nav('home');
+                firebaseAuth.onAuthStateChanged(async (user) => {
+                    currentUser = user;
+                    if (user) {
+                        document.getElementById('auth-overlay').style.display = 'none';
+                        document.getElementById('cloud-status-indicator').innerHTML = `<span style="color:var(--success)">🟢 Terhubung: ${user.email}</span>`;
+                        document.getElementById('settings-user-email').innerText = user.email;
+                        await syncCloudToLocal();
+                        setupRealtimeListeners(user.uid);
+                        loadProfileStatus();
+                        nav('home');
+                    } else {
+                        document.getElementById('auth-overlay').style.display = 'flex';
+                        document.getElementById('cloud-status-indicator').innerHTML = `<span style="color:var(--danger)">🔴 Belum Login</span>`;
+                    }
+                });
             });
             
             document.getElementById('letter-date').valueAsDate = new Date();
         });
+
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            const title = document.getElementById('auth-title');
+            const desc = document.getElementById('auth-desc');
+            const btn = document.getElementById('auth-submit-btn');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleLink = document.getElementById('auth-toggle-link');
+
+            if (isRegisterMode) {
+                title.innerText = "Daftar Akun Baru";
+                desc.innerText = "Buat akun untuk mulai menyimpan surat secara realtime.";
+                btn.innerText = "Daftar";
+                toggleText.innerText = "Sudah punya akun?";
+                toggleLink.innerText = "Masuk di sini";
+            } else {
+                title.innerText = "Masuk ke SuratKu";
+                desc.innerText = "Kelola dokumen lamaran kerja dan data Anda secara aman.";
+                btn.innerText = "Masuk";
+                toggleText.innerText = "Belum punya akun?";
+                toggleLink.innerText = "Daftar sekarang";
+            }
+        }
+
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+
+            try {
+                if (isRegisterMode) {
+                    const cred = await firebaseAuth.createUserWithEmailAndPassword(email, pass);
+                    showToast('Pendaftaran akun berhasil!');
+                    if(activeProfile) syncProfileToCloud(activeProfile);
+                } else {
+                    await firebaseAuth.signInWithEmailAndPassword(email, pass);
+                    showToast('Berhasil Masuk!');
+                }
+            } catch (err) {
+                alert('Autentikasi Gagal: ' + err.message);
+            }
+        }
+
+        async function logoutAccount() {
+            if(confirm("Yakin ingin keluar dari akun?")) {
+                await firebaseAuth.signOut();
+                window.location.reload();
+            }
+        }
 
         function showToast(msg, isError = false) {
             const t = document.getElementById('toast');
@@ -588,19 +604,17 @@
             if(viewId === 'profile') loadProfileForm();
             if(viewId === 'signatures') loadSignatures();
             if(viewId === 'archive') loadArchive();
-            if(viewId === 'editor') {
-                if(isNewLetter) prepNewLetter();
-            }
+            if(viewId === 'editor' && isNewLetter) prepNewLetter();
             if(viewId === 'home') loadProfileStatus();
 
-            const titles = { 'home':'Beranda', 'profile':'Profil Pelamar', 'signatures':'Tanda Tangan', 'editor':'Editor Surat', 'archive':'Arsip Surat', 'settings':'Pengaturan' };
+            const titles = { 'home':'Beranda', 'profile':'Profil Pelamar', 'signatures':'Tanda Tangan', 'editor':'Editor Surat', 'archive':'Arsip Surat', 'settings':'Pengaturan & Akun' };
             document.getElementById('topbar-title').innerText = titles[viewId];
         }
 
         // IndexedDB Lokal
         function initIndexedDB() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('SuratKuFirebaseDB', 1);
+                const request = indexedDB.open('SuratKuDB', 1);
                 request.onupgradeneeded = (e) => {
                     db = e.target.result;
                     if(!db.objectStoreNames.contains('profile')) db.createObjectStore('profile', {keyPath: 'id'});
@@ -1039,7 +1053,7 @@
                     <td><strong>${l.company}</strong></td>
                     <td>${l.position}</td>
                     <td>
-                        <button class="btn-primary" style="font-size:0.8rem; padding:5px 8px;" onclick="openLetter('${l.id}')">Buka</button>
+                        <button class="btn-primary" style="font-size:0.8rem; padding:5px 8px; width:auto;" onclick="openLetter('${l.id}')">Buka</button>
                         <button class="btn-secondary" style="font-size:0.8rem; padding:5px 8px;" onclick="duplicateLetter('${l.id}')">Duplikat</button>
                         <button class="btn-danger" style="font-size:0.8rem; padding:5px 8px;" onclick="deleteLetter('${l.id}')">Hapus</button>
                     </td>
@@ -1083,24 +1097,21 @@
             await dbPut('letters', newL);
             showToast('Surat berhasil diduplikasi.');
             loadArchive();
-            if(cloudUser) syncLetterToCloud(newL);
+            syncLetterToCloud(newL);
         }
 
         async function deleteLetter(id) {
             if(confirm('Hapus surat ini secara permanen?')) {
                 await dbDelete('letters', id);
-                
-                if(window.FB_SDK && cloudUser) {
+                if(currentUser) {
                     try {
-                        const { firestore, doc: fbDoc, deleteDoc: fbDeleteDoc } = window.FB_SDK;
-                        await fbDeleteDoc(fbDoc(firestore, "users", cloudUser.uid, "letters", id));
-                        console.log("Surat berhasil dihapus dari Firestore Firebase.");
+                        await firestoreDb.collection('users').doc(currentUser.uid).collection('letters').doc(id).delete();
+                        await realtimeDb.ref('letters/' + currentUser.uid + '/' + id).remove();
                     } catch(err) {
-                        console.error("Gagal menghapus di cloud Firebase:", err);
+                        console.error("Gagal menghapus cloud:", err);
                     }
                 }
-
-                showToast('Surat dihapus secara permanen.');
+                showToast('Surat dihapus permanen.');
                 loadArchive();
             }
         }
@@ -1132,7 +1143,7 @@
             const url  = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `SuratKu_Firebase_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `SuratKu_Backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -1158,136 +1169,66 @@
 
         async function clearAllData() {
             if(confirm('PERINGATAN: Semua data lokal akan dihapus. Lanjutkan?')) {
-                indexedDB.deleteDatabase('SuratKuFirebaseDB');
+                indexedDB.deleteDatabase('SuratKuDB');
                 alert('Data dihapus.');
                 window.location.reload();
             }
         }
 
-        function initFirebaseListener() {
-            if(!window.FB_SDK) return;
-            const { auth, onAuthStateChanged } = window.FB_SDK;
-            
-            onAuthStateChanged(auth, (user) => {
-                handleAuthChange(user);
+        // Firebase Cloud & Realtime Sync
+        async function syncCloudToLocal() {
+            if(!currentUser) return;
+            try {
+                const profDoc = await firestoreDb.collection('users').doc(currentUser.uid).get();
+                if(profDoc.exists && profDoc.data().profile_data) {
+                    await dbPut('profile', profDoc.data().profile_data);
+                    activeProfile = profDoc.data().profile_data;
+                }
+
+                const lettersSnap = await firestoreDb.collection('users').doc(currentUser.uid).collection('letters').get();
+                lettersSnap.forEach(async (doc) => {
+                    await dbPut('letters', doc.data().content);
+                });
+                loadProfileStatus();
+            } catch(err) {
+                console.error("Gagal sinkronisasi:", err);
+            }
+        }
+
+        function setupRealtimeListeners(uid) {
+            realtimeDb.ref('letters/' + uid).on('value', async (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    for(let id in data) {
+                        await dbPut('letters', data[id]);
+                    }
+                    if(document.getElementById('view-archive').classList.contains('active')) {
+                        loadArchive();
+                    }
+                }
             });
         }
 
-        function handleAuthChange(user) {
-            const wasNotLoggedIn = !cloudUser;
-            cloudUser = user;
-            const ind = document.getElementById('cloud-status-indicator');
-            const btnLogout = document.getElementById('btn-fb-logout');
-            
-            if(user) {
-                ind.innerHTML = `<span style="color:var(--success)">🟢 Firebase: ${user.email}</span>`;
-                if(btnLogout) btnLogout.style.display = 'inline-block';
-                if (wasNotLoggedIn) {
-                    syncCloudToLocal();
-                }
-            } else {
-                ind.innerHTML = `<span style="color:var(--danger)">🔴 Firebase: Belum Login</span>`;
-                if(btnLogout) btnLogout.style.display = 'none';
-            }
-        }
-
-        async function fbLogin() {
-            if(!window.FB_SDK) return alert("Firebase SDK belum siap.");
-            const email = document.getElementById('fb-email').value;
-            const pass = document.getElementById('fb-pass').value;
-            if(!email || !pass) return alert("Email dan Password wajib diisi!");
-            
-            try {
-                const { auth, signInWithEmailAndPassword } = window.FB_SDK;
-                const cred = await signInWithEmailAndPassword(auth, email, pass);
-                showToast('Login Firebase Berhasil!');
-                handleAuthChange(cred.user);
-                syncCloudToLocal();
-            } catch(err) {
-                alert('Login gagal: ' + err.message);
-            }
-        }
-
-        async function fbRegister() {
-            if(!window.FB_SDK) return alert("Firebase SDK belum siap.");
-            const email = document.getElementById('fb-email').value;
-            const pass = document.getElementById('fb-pass').value;
-            if(!email || !pass) return alert("Email dan Password wajib diisi!");
-            
-            try {
-                const { auth, createUserWithEmailAndPassword } = window.FB_SDK;
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                alert('Pendaftaran berhasil! Menyinkronkan data...');
-                handleAuthChange(cred.user);
-                if(activeProfile) syncProfileToCloud(activeProfile);
-                const letters = await dbGetAll('letters');
-                for(let l of letters) syncLetterToCloud(l);
-            } catch(err) {
-                alert('Daftar gagal: ' + err.message);
-            }
-        }
-
-        async function fbLogout() {
-            if(!window.FB_SDK) return;
-            const { auth, signOut } = window.FB_SDK;
-            await signOut(auth);
-            showToast('Telah keluar dari Firebase Cloud');
-        }
-
-        async function syncCloudToLocal() {
-            if(!window.FB_SDK || !cloudUser) return;
-            document.getElementById('cloud-status-indicator').innerHTML = `<span style="color:var(--success)">🟢 Firebase: ${cloudUser.email} (Sinkronisasi...)</span>`;
-            
-            try {
-                const { firestore, doc: fbDoc, getDoc: fbGetDoc, getDocs: fbGetDocs, collection: fbCollection } = window.FB_SDK;
-                
-                // Get Profile
-                const profSnap = await fbGetDoc(fbDoc(firestore, "users", cloudUser.uid, "data", "profile"));
-                if(profSnap.exists()) {
-                    const profData = profSnap.data();
-                    await dbPut('profile', profData);
-                    activeProfile = profData;
-                }
-
-                // Get Letters
-                const lettersSnap = await fbGetDocs(fbCollection(firestore, "users", cloudUser.uid, "letters"));
-                lettersSnap.forEach(async (d) => {
-                    const letterData = d.data();
-                    await dbPut('letters', letterData);
-                });
-
-                showToast('Sinkronisasi Firebase Selesai!');
-                loadProfileStatus();
-            } catch(err) {
-                console.error("Gagal sinkronisasi Firestore:", err);
-            }
-            document.getElementById('cloud-status-indicator').innerHTML = `<span style="color:var(--success)">🟢 Firebase: ${cloudUser.email}</span>`;
-        }
-
         async function syncProfileToCloud(prof) {
-            if(!window.FB_SDK || !cloudUser) return;
-            try {
-                const { firestore, doc: fbDoc, setDoc: fbSetDoc } = window.FB_SDK;
-                await fbSetDoc(fbDoc(firestore, "users", cloudUser.uid, "data", "profile"), {
-                    ...prof,
-                    updated_at: new Date().toISOString()
-                });
-            } catch(err) {
-                console.error("Gagal menyimpan profil ke Firebase:", err);
-            }
+            if(!currentUser) return;
+            await firestoreDb.collection('users').doc(currentUser.uid).set({
+                full_name: prof.name,
+                profile_data: prof,
+                updated_at: new Date().toISOString()
+            }, { merge: true });
         }
 
         async function syncLetterToCloud(letter) {
-            if(!window.FB_SDK || !cloudUser) return;
-            try {
-                const { firestore, doc: fbDoc, setDoc: fbSetDoc } = window.FB_SDK;
-                await fbSetDoc(fbDoc(firestore, "users", cloudUser.uid, "letters", letter.id), {
-                    ...letter,
-                    updated_at: new Date().toISOString()
-                });
-            } catch(err) {
-                console.error("Gagal menyimpan surat ke Firebase:", err);
-            }
+            if(!currentUser) return;
+            await firestoreDb.collection('users').doc(currentUser.uid).collection('letters').doc(letter.id).set({
+                id: letter.id,
+                company: letter.company,
+                position: letter.position,
+                content: letter,
+                updated_at: new Date().toISOString()
+            });
+
+            await realtimeDb.ref('letters/' + currentUser.uid + '/' + letter.id).set(letter);
         }
     </script>
 </body>
