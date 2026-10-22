@@ -3,136 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuratKu - Pembuat Surat Lamaran Kerja (Cloud)</title>
+    <title>SuratKu Cloud - Pembuat Surat Lamaran Kerja Professional</title>
     <style>
         :root {
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
-            --bg-light: #f3f4f6;
+            --bg-light: #f8fafc;
             --bg-white: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
+            --bg-preview: #e2e8f0;
+            --bg-auth: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            --text-main: #1e293b;
+            --text-heading: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --nav-active: #eff6ff;
             --danger: #ef4444;
+            --danger-hover: #dc2626;
             --success: #10b981;
-            --sidebar-width: 250px;
+            --sidebar-width: 260px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --bg-light: #0f172a;
+            --bg-white: #1e293b;
+            --bg-preview: #020617;
+            --bg-auth: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-main: #f1f5f9;
+            --text-heading: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --nav-active: #334155;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-light); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
-        button { cursor: pointer; border: none; outline: none; border-radius: 6px; font-weight: 500; font-family: inherit; transition: all 0.2s; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; margin-bottom: 12px; }
-        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
-        h1, h2, h3 { margin-bottom: 15px; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-light); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        button { cursor: pointer; border: none; outline: none; border-radius: var(--radius-md); font-weight: 500; font-family: inherit; transition: all 0.2s ease; }
+        button:active { transform: scale(0.98); }
+        input, textarea, select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); font-family: inherit; margin-bottom: 15px; background-color: var(--bg-white); color: var(--text-main); transition: border-color 0.2s, box-shadow 0.2s; }
+        input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0.8; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
+        h1, h2, h3, h4 { margin-bottom: 15px; color: var(--text-heading); }
 
         #auth-screen {
-            position: fixed; inset: 0; background: linear-gradient(135deg, var(--bg-light) 0%, #dbeafe 100%);
+            position: fixed; inset: 0; background: var(--bg-auth);
             display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px;
         }
         .auth-card {
-            background: var(--bg-white); padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 100%; max-width: 400px; text-align: center;
+            background: var(--bg-white); padding: 40px; border-radius: var(--radius-lg); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            width: 100%; max-width: 420px; text-align: center; border: 1px solid rgba(255,255,255,0.5);
         }
-        .auth-card h2 { color: var(--primary); margin-bottom: 10px; }
-        .auth-card p { color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem; }
-        .auth-tabs { display: flex; margin-bottom: 20px; background: var(--bg-light); border-radius: 6px; padding: 4px; }
-        .auth-tab { flex: 1; padding: 10px; border-radius: 4px; background: transparent; color: var(--text-muted); }
-        .auth-tab.active { background: var(--bg-white); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .auth-card h2 { color: var(--primary); margin-bottom: 10px; font-size: 1.8rem; }
+        .auth-card p { color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; }
+        .auth-tabs { display: flex; margin-bottom: 25px; background: var(--bg-light); border-radius: var(--radius-md); padding: 5px; }
+        .auth-tab { flex: 1; padding: 10px; border-radius: 8px; background: transparent; color: var(--text-muted); font-weight: 600; }
+        .auth-tab.active { background: var(--bg-white); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .auth-form { display: none; text-align: left; }
         .auth-form.active { display: block; }
-        .auth-btn { width: 100%; padding: 12px; font-size: 1rem; margin-top: 10px; }
+        .auth-btn { width: 100%; padding: 14px; font-size: 1rem; margin-top: 10px; font-weight: 600; }
 
         #app-screen { display: none; width: 100%; height: 100%; }
-        #sidebar { width: var(--sidebar-width); background: var(--bg-white); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
-        #sidebar-header { padding: 20px; font-size: 1.5rem; font-weight: bold; color: var(--primary); border-bottom: 1px solid var(--border); }
-        .nav-menu { list-style: none; flex: 1; overflow-y: auto; padding: 10px 0; }
-        .nav-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-weight: 500; }
-        .nav-item:hover, .nav-item.active { background: var(--bg-light); color: var(--primary); border-right: 3px solid var(--primary); }
+        #sidebar { width: var(--sidebar-width); background: var(--bg-white); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; box-shadow: 1px 0 10px rgba(0,0,0,0.02); }
+        #sidebar-header { padding: 24px 20px; font-size: 1.4rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid var(--border); display:flex; align-items:center; justify-content: space-between; }
+        .nav-menu { list-style: none; flex: 1; overflow-y: auto; padding: 15px 0; display:flex; flex-direction:column; gap:5px; }
+        .nav-item { padding: 12px 16px; margin: 0 12px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; }
+        .nav-item:hover { background: var(--bg-light); color: var(--text-main); }
+        .nav-item.active { background: var(--nav-active); color: var(--primary); }
         
         #sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px); z-index: 99; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(3px); z-index: 99; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
         }
         #sidebar-overlay.open { opacity: 1; pointer-events: auto; }
-        .sidebar-close-btn { display: none; background: none; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: 4px; }
-        .sidebar-close-btn:hover { background: var(--bg-light); color: var(--text-main); }
+        .sidebar-close-btn { display: none; background: var(--bg-light); border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer; padding: 6px 10px; border-radius: 8px; }
 
         #main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        #topbar { background: var(--bg-white); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        #mobile-menu-btn { display: none; background: none; font-size: 1.5rem; color: var(--text-main); }
-        .view-section { flex: 1; overflow-y: auto; padding: 20px; display: none; }
+        #topbar { background: var(--bg-white); padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        #mobile-menu-btn { display: none; background: var(--bg-light); font-size: 1.2rem; padding: 8px 12px; border-radius: 8px; color: var(--text-main); }
+        .view-section { flex: 1; overflow-y: auto; padding: 24px; display: none; scroll-behavior: smooth; }
         .view-section.active { display: block; }
 
-        .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn-primary { background: var(--primary); color: white; padding: 10px 15px; }
+        .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .btn-primary { background: var(--primary); color: white; padding: 12px 18px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3); }
         .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: white; color: var(--text-main); border: 1px solid var(--border); padding: 10px 15px; }
-        .btn-secondary:hover { background: var(--bg-light); }
-        .btn-danger { background: var(--danger); color: white; padding: 10px 15px; }
-        .btn-success { background: var(--success); color: white; padding: 10px 15px; }
+        .btn-secondary { background: var(--bg-white); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; }
+        .btn-secondary:hover { background: var(--bg-light); border-color: #cbd5e1; }
+        .btn-danger { background: var(--danger); color: white; padding: 12px 18px; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-success { background: var(--success); color: white; padding: 12px 18px; }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .notification { position: fixed; bottom: 20px; right: 20px; background: var(--text-main); color: white; padding: 12px 20px; border-radius: 6px; z-index: 1000; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .notification { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 14px 24px; border-radius: var(--radius-md); z-index: 1000; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); font-weight: 500; }
+        .status-badge { display: inline-block; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;}
         .status-draft { background: #fef3c7; color: #d97706; }
         .status-ready { background: #d1fae5; color: #059669; }
 
-        #editor-container { display: flex; gap: 20px; height: 100%; flex-wrap: wrap; }
-        #form-pane { flex: 1; min-width: 300px; max-width: 450px; overflow-y: auto; background: var(--bg-white); padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
-        #preview-pane { flex: 2; min-width: 300px; background: #e5e7eb; overflow-y: auto; padding: 20px; display: flex; justify-content: center; border-radius: 8px; border: 1px solid var(--border); position: relative;}
+        #editor-container { display: flex; gap: 24px; height: 100%; flex-wrap: wrap; }
+        #form-pane { flex: 1; min-width: 320px; max-width: 450px; overflow-y: auto; background: var(--bg-white); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        #preview-pane { flex: 2; min-width: 320px; background: var(--bg-preview); overflow-y: auto; padding: 30px; display: flex; justify-content: center; border-radius: var(--radius-lg); border: 1px solid var(--border); position: relative;}
         
         .a4-paper { 
-            width: 210mm; min-height: 297mm; background: white; padding: 20mm; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            font-size: 12pt; line-height: 1.5; color: black; position: relative;
+            width: 210mm; min-height: 297mm; background: white; padding: 25mm; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            font-size: 12pt; line-height: 1.5; color: black; position: relative; border-radius: 4px;
         }
         .a4-paper p { margin-bottom: 14px; }
         .a4-paper[contenteditable="true"] { outline: 2px dashed var(--border); }
         .a4-paper[contenteditable="true"]:focus { outline: 2px solid var(--primary); }
         
         .sign-img { max-width: 150px; max-height: 100px; object-fit: contain; margin-top: 10px; }
-        .letter-content p { margin-bottom: 12px; }
 
-        .tpl-modern { font-family: 'Segoe UI', sans-serif; }
+        .tpl-modern { font-family: 'Inter', sans-serif; }
         .tpl-modern h3 { color: var(--primary); margin-bottom: 5px; }
-        .tpl-handwritten { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 13pt; background: repeating-linear-gradient(white, white 24px, #e5e7eb 25px); line-height: 25px; padding-top: 5mm; }
+        .tpl-handwritten { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 13pt; background: repeating-linear-gradient(white, white 24px, #f1f5f9 25px); line-height: 25px; padding-top: 5mm; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
-        th { background: var(--bg-light); font-weight: 600; }
+        th, td { text-align: left; padding: 14px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        th { background: var(--bg-light); font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
         tr:hover { background: var(--bg-light); }
         
-        .sign-card { border: 1px solid var(--border); border-radius: 8px; padding: 15px; text-align: center; position: relative; background: white; }
-        .sign-card img { max-width: 100%; height: 100px; object-fit: contain; background: #f9fafb; border: 1px dashed var(--border); margin-bottom: 10px; }
+        .sign-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; position: relative; background: var(--bg-white); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .sign-card img { max-width: 100%; height: 100px; object-fit: contain; background: var(--bg-light); border: 1px dashed var(--border); margin-bottom: 15px; border-radius: 8px; }
         .sign-card.is-default { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
-        .badge-default { position: absolute; top: 10px; right: 10px; background: var(--primary); color: white; font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; }
+        .badge-default { position: absolute; top: 12px; right: 12px; background: var(--primary); color: white; font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
 
         .bio-table { width: 100%; max-width: 600px; margin-bottom: 15px; border-collapse: collapse; }
-        .bio-table td { padding: 3px 0; border-bottom: none; vertical-align: top; }
-        .bio-table td:first-child { font-weight: 400; }
+        .bio-table td { padding: 4px 0; border-bottom: none; vertical-align: top; }
+        .bio-table td:first-child { font-weight: 500; }
+
+        #custom-modal {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 99999; padding: 20px;
+        }
+        .modal-card {
+            background: var(--bg-white); padding: 30px; border-radius: var(--radius-lg); max-width: 400px; width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
 
         @media (max-width: 768px) {
-            #sidebar { position: fixed; top: 0; left: -100%; width: 270px; height: 100%; transition: left 0.3s ease-in-out; box-shadow: 4px 0 15px rgba(0,0,0,0.15); z-index: 100; }
+            #sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 25px rgba(0,0,0,0.2); z-index: 100; }
             #sidebar.open { left: 0; }
             #sidebar-overlay { display: block; }
             .sidebar-close-btn { display: block; }
-            #sidebar-header { display: flex; justify-content: space-between; align-items: center; }
             #mobile-menu-btn { display: block; }
-            #editor-container { flex-direction: column; flex-wrap: nowrap; }
-            #form-pane { max-width: 100%; flex: none; height: 50%; }
-            #preview-pane { flex: 1; padding: 10px; }
-            .a4-paper { width: 100%; padding: 15px; font-size: 10pt; min-height: auto; }
-            .grid-2 { grid-template-columns: 1fr; }
+            
+            .view-section { padding: 15px; }
+            .card { padding: 15px; margin-bottom: 15px; }
+            .grid-2 { grid-template-columns: 1fr; gap: 10px; }
+            
+            #editor-container { flex-direction: column; flex-wrap: nowrap; gap: 15px;}
+            #form-pane { max-width: 100%; flex: none; height: auto; }
+            #preview-pane { flex: none; padding: 15px; background: transparent; border: none; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .a4-paper { width: 100%; min-width: 700px; padding: 15mm; font-size: 11pt; transform-origin: top left; }
         }
 
         @media print {
-            #sidebar, #topbar, #form-pane, .notification, #mobile-menu-btn { display: none !important; }
-            body, html { background: white !important; margin: 0 !important; padding: 0 !important; height: auto !important; overflow: visible !important; }
-            #main-content, #editor-container, #preview-pane { display: block !important; width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: transparent !important; border: none !important; overflow: visible !important; position: static !important; }
+            @page { size: A4; margin: 0; }
+            body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #sidebar, #topbar, #form-pane, .notification, #mobile-menu-btn, #sidebar-overlay, #custom-modal { display: none !important; }
+            #main-content, #editor-container, #preview-pane, .view-section { display: block !important; width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: white !important; border: none !important; overflow: visible !important; position: static !important; }
             body * { visibility: hidden; }
             #a4-preview, #a4-preview * { visibility: visible; }
             #a4-preview { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20mm !important; box-shadow: none; border: none; outline: none; }
-            @page { size: A4; margin: 0mm; }
         }
     </style>
 </head>
@@ -141,7 +186,7 @@
     <div id="auth-screen">
         <div class="auth-card">
             <h2>SuratKu Cloud</h2>
-            <p>Aplikasi pembuat surat lamaran Full Online</p>
+            <p>Pembuat surat lamaran kerja terintegrasi real-time cloud</p>
             
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchAuthTab('login')">Masuk</button>
@@ -150,19 +195,30 @@
 
             <form id="form-login" class="auth-form active" onsubmit="handleLogin(event)">
                 <label>Email</label>
-                <input type="email" id="login-email" required>
+                <input type="email" id="login-email" required placeholder="nama@email.com">
                 <label>Password</label>
-                <input type="password" id="login-password" required>
+                <input type="password" id="login-password" required placeholder="••••••••">
                 <button type="submit" class="btn-primary auth-btn" id="btn-login">Masuk ke Cloud</button>
             </form>
 
             <form id="form-register" class="auth-form" onsubmit="handleRegister(event)">
                 <label>Email Baru</label>
-                <input type="email" id="reg-email" required>
-                <label>Password</label>
-                <input type="password" id="reg-password" required minlength="6">
-                <button type="submit" class="btn-success auth-btn" id="btn-register">Buat Akun</button>
+                <input type="email" id="reg-email" required placeholder="nama@email.com">
+                <label>Password (Min. 6 Karakter)</label>
+                <input type="password" id="reg-password" required minlength="6" placeholder="••••••••">
+                <button type="submit" class="btn-success auth-btn" id="btn-register">Buat Akun Baru</button>
             </form>
+        </div>
+    </div>
+
+    <div id="custom-modal">
+        <div class="modal-card">
+            <h3 id="modal-title">Konfirmasi Aksi</h3>
+            <p id="modal-desc" style="color: var(--text-muted); margin-bottom: 25px;">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-secondary" id="modal-btn-cancel" style="flex:1;">Batal</button>
+                <button class="btn-danger" id="modal-btn-confirm" style="flex:1;">Ya, Lanjutkan</button>
+            </div>
         </div>
     </div>
 
@@ -171,7 +227,7 @@
 
         <aside id="sidebar">
             <div id="sidebar-header">
-                <span>SuratKu</span>
+                <span style="display: flex; align-items: center; gap: 8px;">📄 SuratKu</span>
                 <button class="sidebar-close-btn" onclick="toggleSidebar(false)" aria-label="Tutup Menu">✕</button>
             </div>
             <ul class="nav-menu">
@@ -179,16 +235,26 @@
                 <li class="nav-item" onclick="nav('profile')">👤 Profil Pelamar</li>
                 <li class="nav-item" onclick="nav('signatures')">✍️ Tanda Tangan</li>
                 <li class="nav-item" onclick="nav('editor', true)">📝 Buat Surat Baru</li>
-                <li class="nav-item" onclick="nav('archive')">📁 Surat Tersimpan</li>
-                <li class="nav-item" onclick="nav('settings')">⚙️ Akun Cloud</li>
+                <li class="nav-item" onclick="nav('archive')">📁 Arsip Surat</li>
             </ul>
+            <div style="padding: 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-secondary" id="theme-toggle-btn" onclick="toggleTheme()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
+                    🌙 Mode Gelap
+                </button>
+                <button class="btn-danger" onclick="handleLogout()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
+                    🚪 Keluar Akun
+                </button>
+            </div>
         </aside>
 
         <main id="main-content">
             <header id="topbar">
-                <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-                <h2 id="topbar-title" style="margin:0; font-size: 1.2rem;">Beranda</h2>
-                <div style="font-size: 0.9rem; color: var(--success); font-weight: 500;" id="cloud-status-indicator">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h2 id="topbar-title" style="margin:0; font-size: 1.25rem; font-weight: 700;">Beranda</h2>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--success); font-weight: 600; display: flex; align-items: center; gap: 6px;" id="cloud-status-indicator">
+                    <span style="display:inline-block; width:8px; height:8px; background:var(--success); border-radius:50%; box-shadow: 0 0 6px var(--success);"></span>
                     <span id="user-email-display">Menghubungkan...</span>
                 </div>
             </header>
@@ -197,19 +263,19 @@
             <section id="view-home" class="view-section active">
                 <div class="card">
                     <h2>Selamat Datang di SuratKu Cloud!</h2>
-                    <p>Semua data Anda tersimpan aman dan real-time di server Firebase.</p>
+                    <p>Seluruh dokumen, profil, dan tanda tangan Anda tersinkronisasi secara aman dan real-time di server Firebase.</p>
                     <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn-primary" onclick="nav('editor', true)">+ Buat Surat Baru</button>
-                        <button class="btn-secondary" onclick="nav('profile')">Lengkapi Profil</button>
+                        <button class="btn-secondary" onclick="nav('profile')">Lengkapi Profil Pelamar</button>
                     </div>
                 </div>
                 <div class="grid-2">
                     <div class="card">
-                        <h3>Status Profil</h3>
-                        <p id="home-profile-status">Memuat data dari cloud...</p>
+                        <h3>Status Profil Cloud</h3>
+                        <p id="home-profile-status">Memuat data dari server...</p>
                     </div>
                     <div class="card">
-                        <h3>Statistik Surat</h3>
+                        <h3>Statistik Arsip</h3>
                         <p>Total Surat di Cloud: <strong id="home-letter-count">0</strong></p>
                     </div>
                 </div>
@@ -220,8 +286,8 @@
                 <div class="card">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                         <div>
-                            <h2>Profil Pelamar</h2>
-                            <p style="color: var(--text-muted); margin-bottom: 20px;">Data ini akan digunakan otomatis untuk setiap surat.</p>
+                            <h2>Profil Pelamar Utama</h2>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;">Data ini akan digunakan otomatis ke dalam semua template surat.</p>
                         </div>
                         <button class="btn-primary" onclick="saveProfile()" style="height:fit-content;">☁️ Simpan ke Cloud</button>
                     </div>
@@ -242,12 +308,12 @@
                             </div>
                         </div>
                         
-                        <label>Alamat Lengkap *</label>
+                        <label>Alamat Lengkap KTP *</label>
                         <textarea id="prof-address" rows="3" required></textarea>
                         
                         <div class="grid-2">
                             <div><label>Kota Domisili *</label><input type="text" id="prof-city" required></div>
-                            <div><label>Lokasi Surat (Untuk Tanggal) *</label><input type="text" id="prof-location" placeholder="Cth: Semarang" required></div>
+                            <div><label>Lokasi Surat (Untuk Keterangan Kota) *</label><input type="text" id="prof-location" placeholder="Cth: Semarang" required></div>
                             <div>
                                 <label>Pendidikan Terakhir *</label>
                                 <select id="prof-edu" required>
@@ -259,15 +325,15 @@
                                     <option value="Lainnya">Lainnya</option>
                                 </select>
                             </div>
-                            <div><label>Nama Institusi (Kampus/Sekolah)</label><input type="text" id="prof-institution"></div>
-                            <div><label>Jurusan</label><input type="text" id="prof-major" placeholder="Cth: Manajemen Transpor"></div>
+                            <div><label>Nama Institusi (Kampus / Sekolah)</label><input type="text" id="prof-institution"></div>
+                            <div><label>Jurusan</label><input type="text" id="prof-major" placeholder="Cth: Teknik Informatika"></div>
                         </div>
 
                         <label>Keahlian (Pisahkan dengan koma)</label>
-                        <input type="text" id="prof-skills" placeholder="Misal: Microsoft Office, Akuntansi, Desain Grafis">
+                        <input type="text" id="prof-skills" placeholder="Misal: Microsoft Office, Analisis Data, Komunikasi">
 
                         <label>Pengalaman Kerja (Opsional)</label>
-                        <textarea id="prof-experience" rows="3" placeholder="Ceritakan pengalaman kerja Anda secara singkat..."></textarea>
+                        <textarea id="prof-experience" rows="3" placeholder="Ceritakan pengalaman kerja atau magang Anda secara singkat..."></textarea>
                     </form>
                 </div>
             </section>
@@ -275,19 +341,19 @@
             <!-- VIEW: Tanda Tangan -->
             <section id="view-signatures" class="view-section">
                 <div class="card">
-                    <h2>Tanda Tangan Cloud</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 20px;">Unggah tanda tangan Anda. Akan disinkronisasikan ke semua perangkat.</p>
+                    <h2>Kelola Tanda Tangan Cloud</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Unggah gambar tanda tangan Anda. Tersinkronisasi otomatis lintas perangkat.</p>
                     
-                    <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items:flex-end;">
-                        <div style="flex:1;">
-                            <label>Pilih Gambar File</label>
-                            <input type="file" id="sign-file" accept="image/png, image/jpeg, image/jpg">
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items:flex-end; flex-wrap: wrap;">
+                        <div style="flex:1; min-width: 200px;">
+                            <label>Pilih File Gambar (PNG / JPG)</label>
+                            <input type="file" id="sign-file" accept="image/png, image/jpeg">
                         </div>
-                        <div style="flex:1;">
-                            <label>Beri Nama (Opsional)</label>
-                            <input type="text" id="sign-name" placeholder="Nama Tanda Tangan">
+                        <div style="flex:1; min-width: 200px;">
+                            <label>Beri Nama Tanda Tangan</label>
+                            <input type="text" id="sign-name" placeholder="Cth: TTD Formal Utama">
                         </div>
-                        <button class="btn-primary" onclick="uploadSignature()" style="margin-bottom: 12px;">Unggah & Simpan</button>
+                        <button class="btn-primary" onclick="uploadSignature()" style="margin-bottom: 12px;">Unggah ke Cloud</button>
                     </div>
 
                     <div class="grid-2" id="signature-list">
@@ -300,9 +366,9 @@
             <section id="view-editor" class="view-section">
                 <div id="editor-container">
                     <div id="form-pane">
-                        <h3>Data Lamaran</h3>
+                        <h3>Konfigurasi Surat</h3>
                         
-                        <label>Pilih Template</label>
+                        <label>Pilih Template Desain</label>
                         <select id="letter-template" onchange="generatePreview()">
                             <option value="formal">Template 1 - Formal Klasik</option>
                             <option value="modern">Template 2 - Modern Minimalis</option>
@@ -312,16 +378,16 @@
                             <option value="handwritten">Template 6 - Tulis Formal (Visual)</option>
                         </select>
 
-                        <div class="grid-2" style="margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <div class="grid-2" style="margin-bottom: 12px; background: var(--bg-light); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
                             <div>
                                 <label style="font-size: 0.8rem;">Perataan Paragraf</label>
                                 <select id="setting-align" onchange="generatePreview()" style="margin-bottom:0; padding: 8px;">
-                                    <option value="justify">Rata Kanan-Kiri (Justify)</option>
-                                    <option value="left">Rata Kiri (Left)</option>
+                                    <option value="justify">Rata Kanan-Kiri</option>
+                                    <option value="left">Rata Kiri</option>
                                 </select>
                             </div>
                             <div>
-                                <label style="font-size: 0.8rem;">Jarak Spasi</label>
+                                <label style="font-size: 0.8rem;">Jarak Spasi Baris</label>
                                 <select id="setting-spacing" onchange="generatePreview()" style="margin-bottom:0; padding: 8px;">
                                     <option value="1.5">Spasi 1.5</option>
                                     <option value="1.15">Spasi 1.15</option>
@@ -330,25 +396,25 @@
                             </div>
                         </div>
 
-                        <label>Tanggal Surat *</label>
+                        <label>Tanggal Pembuatan Surat *</label>
                         <input type="date" id="letter-date" onchange="generatePreview()">
 
                         <label>Kepada Yth. *</label>
                         <input type="text" id="letter-to" placeholder="Cth: HRD Manager" value="HRD Manager" oninput="generatePreview()">
 
-                        <label>Nama Perusahaan *</label>
-                        <input type="text" id="letter-company" placeholder="Cth: PT Contoh Indonesia" oninput="generatePreview()">
+                        <label>Nama Perusahaan Tujuan *</label>
+                        <input type="text" id="letter-company" placeholder="Cth: PT Maju Sejahtera" oninput="generatePreview()">
 
                         <label>Alamat Perusahaan (Opsional)</label>
-                        <textarea id="letter-company-addr" rows="2" placeholder="Jln. Sudirman No.1, Jakarta" oninput="generatePreview()"></textarea>
+                        <textarea id="letter-company-addr" rows="2" placeholder="Jln. Sudirman No. 45, Jakarta" oninput="generatePreview()"></textarea>
 
-                        <label>Posisi yang Dilamar *</label>
+                        <label>Posisi / Jabatan yang Dilamar *</label>
                         <input type="text" id="letter-position" placeholder="Cth: Staff Administrasi" oninput="generatePreview()">
 
-                        <label>Sumber Info (Opsional)</label>
-                        <input type="text" id="letter-source" placeholder="Cth: Jobstreet, 10 Agustus 2026" oninput="generatePreview()">
+                        <label>Sumber Informasi Lowongan (Opsional)</label>
+                        <input type="text" id="letter-source" placeholder="Cth: Jobstreet, 12 Oktober 2026" oninput="generatePreview()">
 
-                        <label>Tanda Tangan</label>
+                        <label>Pilih Tanda Tangan</label>
                         <select id="letter-signature-select" onchange="generatePreview()">
                             <option value="">Tanpa Tanda Tangan</option>
                         </select>
@@ -373,34 +439,23 @@
                 <div class="card">
                     <h2>Arsip Surat Cloud</h2>
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <input type="text" id="search-archive" placeholder="Cari perusahaan atau posisi..." oninput="renderArchive()" style="flex:1; margin:0;">
+                        <input type="text" id="search-archive" placeholder="Cari berdasarkan perusahaan atau posisi..." oninput="renderArchive()" style="flex:1; margin:0;">
                     </div>
-                    <div style="overflow-x:auto;">
+                    <div style="overflow-x:auto; border-radius: 8px; border: 1px solid var(--border);">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Tanggal Dibuat</th>
+                                    <th>Tanggal</th>
                                     <th>Perusahaan</th>
                                     <th>Posisi</th>
-                                    <th>Aksi</th>
+                                    <th>Aksi Cepat</th>
                                 </tr>
                             </thead>
                             <tbody id="archive-list">
-                                <tr><td colspan="4" style="text-align:center;">Memuat data dari server...</td></tr>
+                                <tr><td colspan="4" style="text-align:center;">Memuat data dari server cloud...</td></tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </section>
-
-            <!-- VIEW: Pengaturan Akun -->
-            <section id="view-settings" class="view-section">
-                <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
-                    <h2>Akun SuratKu Cloud</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 20px;">Anda masuk sebagai:</p>
-                    <h3 id="settings-email-display" style="color: var(--primary); margin-bottom: 30px;"></h3>
-                    
-                    <button class="btn-danger" onclick="handleLogout()" style="width: 100%;">🚪 Keluar / Logout</button>
                 </div>
             </section>
         </main>
@@ -409,8 +464,6 @@
     </div>
 
     <script type="module">
-        // Import Firebase v13.1.0 secara spesifik sesuai kode integrasi Anda, 
-        // namun kita menggunakan Firestore untuk keandalan Database Dokumen (Strict Paths Mandate)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-analytics.js";
         import { 
@@ -433,7 +486,6 @@
             query
         } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
-        // Konfigurasi Firebase dari pengguna (GANTI DENGAN KREDENSIAL ASLI FIREBASE ANDA)
         const firebaseConfig = {
             apiKey: "AIzaSyDouxkrVBJsX2oEQQ89D5inVLAyeez_5EU",
             authDomain: "suratapp-6b342.firebaseapp.com",
@@ -445,14 +497,11 @@
             measurementId: "G-5JD5WX8X5Y"
         };
 
-        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        // analytics inisiasi aman dengan try catch jika terhalang adblocker
         try { getAnalytics(app); } catch(e){}
 
-        // State Global Aplikasi
         let currentUser = null;
         const systemAppId = typeof __app_id !== 'undefined' ? __app_id : 'suratku-default';
         
@@ -462,12 +511,23 @@
         let currentLetterId = null;
         let letterManuallyEdited = false;
         
-        // Listeners Unsubscribe
         let unsubProfile = null;
         let unsubSignatures = null;
         let unsubLetters = null;
 
-        // --- SISTEM UTILITAS ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        window.toggleTheme = () => {
+            const root = document.documentElement;
+            const currentTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            
+            const btn = document.getElementById('theme-toggle-btn');
+            if (btn) btn.innerHTML = currentTheme === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap';
+        };
+
         window.showToast = (msg, isError = false) => {
             const t = document.getElementById('toast');
             t.textContent = msg;
@@ -480,12 +540,35 @@
             return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         };
 
-        // --- UI & NAVIGASI ---
+        // Custom Modal Pengganti Confirm() Sesuai Aturan Sistem
+        window.showConfirmModal = (title, desc, onConfirm) => {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-desc').textContent = desc;
+            modal.style.display = 'flex';
+
+            const btnConfirm = document.getElementById('modal-btn-confirm');
+            const btnCancel = document.getElementById('modal-btn-cancel');
+
+            // Hapus event listener lama dengan clone
+            const newConfirm = btnConfirm.cloneNode(true);
+            const newCancel = btnCancel.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
+            btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+
+            newConfirm.addEventListener('click', () => {
+                modal.style.display = 'none';
+                if(onConfirm) onConfirm();
+            });
+            newCancel.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        };
+
         window.switchAuthTab = (tab) => {
             const isLogin = tab === 'login';
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-            
             document.querySelectorAll('.auth-tab')[isLogin ? 0 : 1].classList.add('active');
             document.getElementById(isLogin ? 'form-login' : 'form-register').classList.add('active');
         };
@@ -524,30 +607,25 @@
             if (window.innerWidth <= 768) toggleSidebar(false);
 
             if(viewId === 'profile') populateProfileForm();
-            if(viewId === 'editor') {
-                if(isNewLetter) prepNewLetter();
-            }
+            if(viewId === 'editor' && isNewLetter) prepNewLetter();
 
-            const titles = { 'home':'Beranda', 'profile':'Profil Pelamar', 'signatures':'Tanda Tangan', 'editor':'Editor Surat', 'archive':'Arsip Surat Cloud', 'settings':'Akun Cloud' };
-            document.getElementById('topbar-title').innerText = titles[viewId];
+            const titles = { 'home':'Beranda', 'profile':'Profil Pelamar', 'signatures':'Tanda Tangan', 'editor':'Editor Surat', 'archive':'Arsip Surat Cloud' };
+            document.getElementById('topbar-title').innerText = titles[viewId] || 'SuratKu Cloud';
         };
 
-        // --- AUTENTIKASI FIREBASE ---
-        
-        // Pengecekan apakah Konfigurasi sudah diganti
         const checkValidConfig = () => {
             if (firebaseConfig.apiKey.includes("GANTI_DENGAN") || firebaseConfig.apiKey === "AIzaSyDeIty5GcBUWKots") {
-                window.showToast("API Key Firebase tidak valid. Harap masukkan konfigurasi Firebase Anda yang sebenarnya di dalam kode.", true);
+                window.showToast("API Key Firebase tidak valid. Harap masukkan konfigurasi Firebase Anda.", true);
                 return false;
             }
             return true;
         };
 
-        // Cek Mandat Lingkungan (Custom Token)
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
             signInWithCustomToken(auth, __initial_auth_token).catch(e => {
-                console.error("Custom token error", e);
-                if(e.message.includes("api-key-not-valid")) checkValidConfig();
+                if (!e.message.includes("api-key-not-valid")) {
+                    console.warn("Custom token login info:", e.message);
+                }
             });
         }
 
@@ -562,9 +640,7 @@
                 
                 const emailStr = user.email || 'User';
                 document.getElementById('user-email-display').innerText = emailStr;
-                document.getElementById('settings-email-display').innerText = emailStr;
                 
-                // Mulai Listener Real-time
                 startCloudListeners();
                 window.nav('home');
             } else {
@@ -605,18 +681,15 @@
             } catch (err) {
                 window.showToast(err.message, true);
             } finally {
-                btn.innerText = 'Buat Akun';
+                btn.innerText = 'Buat Akun Baru';
             }
         };
 
         window.handleLogout = () => {
             signOut(auth);
-            window.showToast('Berhasil keluar.');
+            window.showToast('Berhasil keluar dari akun.');
         };
 
-        // --- CLOUD FIRESTORE LOGIC ---
-        // Aturan Path Ketat: artifacts/{appId}/users/{userId}/{collectionName}
-        
         function getProfileRef() { return doc(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'profile', 'main'); }
         function getSignaturesRef() { return collection(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'signatures'); }
         function getLettersRef() { return collection(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'letters'); }
@@ -624,7 +697,6 @@
         function startCloudListeners() {
             if(!currentUser) return;
 
-            // 1. Listen Profil
             unsubProfile = onSnapshot(getProfileRef(), (docSnap) => {
                 if(docSnap.exists()) {
                     activeProfile = docSnap.data();
@@ -636,18 +708,15 @@
                 populateProfileForm();
             }, (error) => console.error(error));
 
-            // 2. Listen Signatures
             unsubSignatures = onSnapshot(query(getSignaturesRef()), (snapshot) => {
                 signaturesData = [];
                 snapshot.forEach(doc => { signaturesData.push({ id: doc.id, ...doc.data() }); });
                 renderSignatures();
             }, (error) => console.error(error));
 
-            // 3. Listen Letters (Arsip)
             unsubLetters = onSnapshot(query(getLettersRef()), (snapshot) => {
                 lettersData = [];
                 snapshot.forEach(doc => { lettersData.push({ id: doc.id, ...doc.data() }); });
-                // Sorting in memory (no complex query requirement)
                 lettersData.sort((a,b) => new Date(b.date) - new Date(a.date));
                 document.getElementById('home-letter-count').innerText = lettersData.length;
                 window.renderArchive();
@@ -660,7 +729,6 @@
             if(unsubLetters) unsubLetters();
         }
 
-        // --- MANAJEMEN PROFIL ---
         function populateProfileForm() {
             if(!activeProfile) return;
             const p = activeProfile;
@@ -682,7 +750,7 @@
                 gender: document.getElementById('prof-gender').value,
                 address: document.getElementById('prof-address').value,
                 city: document.getElementById('prof-city').value,
-                location: document.getElementById('prof-location') ? document.getElementById('prof-location').value : '',
+                location: document.getElementById('prof-location').value,
                 edu: document.getElementById('prof-edu').value,
                 institution: document.getElementById('prof-institution').value,
                 major: document.getElementById('prof-major').value,
@@ -699,13 +767,12 @@
             }
         };
 
-        // --- MANAJEMEN TANDA TANGAN ---
         function renderSignatures() {
             const list = document.getElementById('signature-list');
             const selectEditor = document.getElementById('letter-signature-select');
             
             if (signaturesData.length === 0) {
-                list.innerHTML = `<div style="grid-column: span 2; text-align: center; color: var(--text-muted); padding:20px;">Belum ada tanda tangan.</div>`;
+                list.innerHTML = `<div style="grid-column: span 2; text-align: center; color: var(--text-muted); padding:20px;">Belum ada tanda tangan di cloud.</div>`;
                 selectEditor.innerHTML = '<option value="">Tanpa Tanda Tangan</option>';
                 return;
             }
@@ -721,7 +788,7 @@
                         <h4>${sig.name}</h4>
                         <div style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
                             ${!sig.isDefault ? `<button class="btn-secondary" onclick="setDefaultSignature('${sig.id}')" style="font-size:0.8rem; padding:5px 10px;">Set Default</button>` : ''}
-                            <button class="btn-danger" onclick="deleteSignature('${sig.id}')" style="font-size:0.8rem; padding:5px 10px;">Hapus</button>
+                            <button class="btn-danger" onclick="confirmDeleteSignature('${sig.id}')" style="font-size:0.8rem; padding:5px 10px;">Hapus</button>
                         </div>
                     </div>
                 `;
@@ -732,7 +799,6 @@
                 selectEditor.appendChild(opt);
             });
             
-            // Auto update preview jika ada perubahan TTD dan sedang di editor
             if(document.getElementById('view-editor').classList.contains('active')) {
                 window.generatePreview(true);
             }
@@ -756,11 +822,11 @@
                         createdAt: new Date().toISOString()
                     };
                     await addDoc(getSignaturesRef(), newSig);
-                    window.showToast('Tanda tangan berhasil diunggah ke Cloud!');
+                    window.showToast('Tanda tangan diunggah ke Cloud!');
                     document.getElementById('sign-file').value = '';
                     document.getElementById('sign-name').value = '';
                 } catch(err) {
-                    window.showToast('Gagal mengunggah.', true);
+                    window.showToast('Gagal mengunggah tanda tangan.', true);
                 }
             };
             reader.readAsDataURL(file);
@@ -769,12 +835,10 @@
         window.setDefaultSignature = async (id) => {
             if(!currentUser) return;
             try {
-                // Hapus default sebelumnya
                 const prevDefault = signaturesData.find(s => s.isDefault);
                 if(prevDefault) {
                     await setDoc(doc(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'signatures', prevDefault.id), { ...prevDefault, isDefault: false });
                 }
-                // Set default baru
                 const target = signaturesData.find(s => s.id === id);
                 if(target) {
                     await setDoc(doc(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'signatures', target.id), { ...target, isDefault: true });
@@ -782,23 +846,20 @@
             } catch(e) { console.error(e); }
         };
 
-        window.deleteSignature = async (id) => {
-            if(!currentUser) return;
-            // Gunakan custom modal custom konfirmasi agar tidak menggunakan fungsi alert/confirm bawaan browser.
-            // Namun untuk penyederhanaan pada lingkungan terbatas ini tanpa alert(), kita hapus langsung via toast logic.
-            try {
-                await deleteDoc(doc(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'signatures', id));
-                window.showToast('Tanda tangan dihapus dari Cloud.');
-            } catch(e) { window.showToast('Gagal menghapus.', true); }
+        window.confirmDeleteSignature = (id) => {
+            window.showConfirmModal("Hapus Tanda Tangan", "Tanda tangan ini akan dihapus permanen dari Cloud.", async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'signatures', id));
+                    window.showToast('Tanda tangan dihapus.');
+                } catch(e) { window.showToast('Gagal menghapus.', true); }
+            });
         };
 
-
-        // --- MANAJEMEN EDITOR SURAT ---
         function prepNewLetter() {
             currentLetterId = window.generateId();
             letterManuallyEdited = false;
             if(!activeProfile) {
-                window.showToast("Profil pelamar belum diisi. Anda diarahkan ke halaman profil.", true);
+                window.showToast("Profil pelamar belum diisi. Harap lengkapi terlebih dahulu.", true);
                 return window.nav('profile');
             }
             document.getElementById('letter-company').value = '';
@@ -807,23 +868,20 @@
             document.getElementById('letter-source').value = '';
             document.getElementById('letter-date').valueAsDate = new Date();
             
-            // Set default signature if exist
             const defSig = signaturesData.find(s => s.isDefault);
             if(defSig) document.getElementById('letter-signature-select').value = defSig.id;
             
             window.generatePreview();
         }
 
-        window.markAsManuallyEdited = () => {
-            letterManuallyEdited = true;
-        };
+        window.markAsManuallyEdited = () => { letterManuallyEdited = true; };
 
         window.generatePreview = (force = false) => {
-            if (letterManuallyEdited && !force) return; // Prevent overwriting manual edits during generic input changes unless forced
+            if (letterManuallyEdited && !force) return;
 
             const p = activeProfile || {};
-            const alignSetting = document.getElementById('setting-align') ? document.getElementById('setting-align').value : 'justify';
-            const spacingSetting = document.getElementById('setting-spacing') ? document.getElementById('setting-spacing').value : '1.5';
+            const alignSetting = document.getElementById('setting-align').value;
+            const spacingSetting = document.getElementById('setting-spacing').value;
             
             document.getElementById('a4-preview').style.textAlign = alignSetting;
             document.getElementById('a4-preview').style.lineHeight = spacingSetting;
@@ -842,18 +900,16 @@
             let sigHtml = '<br><br><br>';
             if(l.sigId && signaturesData.length > 0) {
                 const sig = signaturesData.find(s => s.id === l.sigId);
-                if(sig) {
-                    sigHtml = `<img src="${sig.data}" class="sign-img" alt="Tanda Tangan"><br>`;
-                }
+                if(sig) sigHtml = `<img src="${sig.data}" class="sign-img" alt="Tanda Tangan"><br>`;
             }
 
             let html = '';
             if(l.template === 'formal') {
                 let destAddress = l.address ? l.address.replace(/\n/g, '<br>di ') : '[Tempat]';
                 let eduStr = p.edu || '-';
-                if(p.major && p.major.trim() !== '') eduStr += ' ' + p.major.trim();
+                if(p.major) eduStr += ' ' + p.major;
 
-                let openingParagraph = (l.source && l.source.trim() !== '') 
+                let openingParagraph = (l.source) 
                     ? `Berdasarkan informasi lowongan pekerjaan yang saya peroleh dari ${l.source}, saya bermaksud mengajukan lamaran kerja untuk posisi <strong>${l.position}</strong> di perusahaan yang Bapak/Ibu pimpin.`
                     : `Melalui surat ini, saya bermaksud mengajukan lamaran kerja untuk posisi <strong>${l.position}</strong> di perusahaan yang Bapak/Ibu pimpin.`;
                 
@@ -865,15 +921,15 @@
                         Kepada Yth.<br>${l.to}<br><strong>${l.company}</strong><br>di ${destAddress}
                     </div>
                     <p>Dengan hormat,</p>
-                    <p>${openingParagraph}<br>Berikut adalah data diri saya:</p>
+                    <p>${openingParagraph}<br>Berikut adalah ringkasan data diri saya:</p>
                     <table class="bio-table" style="margin-bottom: 14px;">
-                        <tr><td style="width:170px;">Nama</td><td style="width:15px;">:</td><td><strong>${p.name || '-'}</strong></td></tr>
-                        <tr><td>Tempat, Tanggal Lahir</td><td>:</td><td>${p.birthplace || '-'}, ${window.formatDate(p.birthdate)}</td></tr>
+                        <tr><td style="width:170px;">Nama Lengkap</td><td style="width:15px;">:</td><td><strong>${p.name || '-'}</strong></td></tr>
+                        <tr><td>Tempat, Tgl Lahir</td><td>:</td><td>${p.birthplace || '-'}, ${window.formatDate(p.birthdate)}</td></tr>
                         <tr><td>Pendidikan Terakhir</td><td>:</td><td>${eduStr}</td></tr>
-                        <tr><td>Alamat</td><td>:</td><td>${p.address || '-'}</td></tr>
-                        <tr><td>Alamat Domisili</td><td>:</td><td>${p.city || '-'}</td></tr>
-                        <tr><td>Nomor Telepon</td><td>:</td><td>${p.phone || '-'}</td></tr>
-                        <tr><td>Email</td><td>:</td><td>${p.email || '-'}</td></tr>
+                        <tr><td>Alamat KTP</td><td>:</td><td>${p.address || '-'}</td></tr>
+                        <tr><td>Domisili</td><td>:</td><td>${p.city || '-'}</td></tr>
+                        <tr><td>Nomor Telepon / WA</td><td>:</td><td>${p.phone || '-'}</td></tr>
+                        <tr><td>Alamat Email</td><td>:</td><td>${p.email || '-'}</td></tr>
                     </table>
                     <p>Saya memiliki pengalaman kerja sebagai Staf Administrasi di salah satu perusahaan yang bergerak di bidang kesehatan. Selain itu, saya juga memiliki pengalaman bekerja sebagai Staf Ekspor Impor. Dari pengalaman tersebut, saya memiliki kemampuan dalam administrasi, pengarsipan, pengelolaan dokumen, pengolahan data, dan koordinasi operasional, serta mampu berkomunikasi dengan baik, bekerja sama dalam tim, dan beradaptasi dengan lingkungan kerja. Dengan pengalaman dan kemampuan yang saya miliki, saya berharap dapat memberikan kontribusi positif serta menjalankan tanggung jawab pekerjaan secara profesional di perusahaan yang Bapak/Ibu pimpin.</p>
                     <p>Demikian surat lamaran kerja ini saya sampaikan. Besar harapan saya untuk mendapatkan kesempatan mengikuti proses seleksi dan bergabung dengan perusahaan yang Bapak/Ibu pimpin. Atas perhatian dan kesempatan yang diberikan, saya ucapkan terima kasih.</p>
@@ -891,7 +947,7 @@
                         <p>${p.location || p.city || 'Kota'}, ${l.dateStr}</p>
                         <p>Yth. ${l.to}<br><strong>${l.company}</strong><br>${l.address ? l.address.replace(/\n/g, '<br>') : ''}</p><br>
                         <p>Dengan hormat,</p>
-                        <p>Menanggapi informasi lowongan pekerjaan di <strong>${l.company}</strong> untuk posisi <strong>${l.position}</strong>, saya mengajukan diri untuk mengisi posisi tersebut.</p>
+                        <p>Menanggapi lowongan pekerjaan di <strong>${l.company}</strong> untuk posisi <strong>${l.position}</strong>, dengan antusias saya mengajukan surat lamaran ini.</p>
                         <p>Hormat saya,</p>
                         <div style="display: flex; justify-content: flex-end; margin-top: 20px; margin-right: 50px;">
                             <div style="text-align: center;">${sigHtml}<strong>${p.name || '-'}</strong></div>
@@ -899,11 +955,11 @@
                     </div>
                 `;
             } else if (l.template === 'fresh') {
-                html = `<p>${p.location || p.city || 'Kota'}, ${l.dateStr}</p><p>Kepada Yth. ${l.to}<br>${l.company}</p><br><p>Dengan hormat,</p><p>Saya yang bertanda tangan di bawah ini, baru saja lulus dari ${p.institution || '[Institusi]'}. Bermaksud melamar posisi <strong>${l.position}</strong>.</p><br><div style="display: flex; justify-content: flex-end; margin-top: 20px; margin-right: 50px;"><div style="text-align: center;">Hormat saya,<br>${sigHtml}<strong>${p.name || '-'}</strong></div></div>`;
+                html = `<p>${p.location || p.city || 'Kota'}, ${l.dateStr}</p><p>Kepada Yth. ${l.to}<br>${l.company}</p><br><p>Dengan hormat,</p><p>Sebagai lulusan baru dari ${p.institution || '[Institusi]'}. Saya bermaksud melamar posisi <strong>${l.position}</strong> di perusahaan Anda.</p><br><div style="display: flex; justify-content: flex-end; margin-top: 20px; margin-right: 50px;"><div style="text-align: center;">Hormat saya,<br>${sigHtml}<strong>${p.name || '-'}</strong></div></div>`;
             } else if (l.template === 'experienced') {
-                html = `<p>${p.location || p.city || 'Kota'}, ${l.dateStr}</p><p>Kepada Yth.<br>${l.to} ${l.company}</p><br><p>Dengan hormat,</p><p>Melalui surat ini, saya ingin menyatakan ketertarikan untuk mengisi posisi <strong>${l.position}</strong> dengan pengalaman profesional saya yang relevan.</p><br><div style="display: flex; justify-content: flex-end; margin-top: 20px; margin-right: 50px;"><div style="text-align: center;">Hormat saya,<br>${sigHtml}<strong>${p.name || '-'}</strong></div></div>`;
+                html = `<p>${p.location || p.city || 'Kota'}, ${l.dateStr}</p><p>Kepada Yth.<br>${l.to} ${l.company}</p><br><p>Dengan hormat,</p><p>Melalui pengalaman profesional saya, saya berminat mengisi posisi <strong>${l.position}</strong> di perusahaan yang Bapak/Ibu pimpin.</p><br><div style="display: flex; justify-content: flex-end; margin-top: 20px; margin-right: 50px;"><div style="text-align: center;">Hormat saya,<br>${sigHtml}<strong>${p.name || '-'}</strong></div></div>`;
             } else if (l.template === 'email') {
-                html = `<p><strong>Subject: Lamaran Pekerjaan - ${l.position} - ${p.name || 'Nama'}</strong></p><hr style="border:0; border-top:1px solid #ccc; margin: 10px 0;"><p>Yth. ${l.to} ${l.company},</p><br><p>Perkenalkan, nama saya ${p.name || '-'}. Bersama email ini, saya bermaksud menyampaikan lamaran untuk posisi <strong>${l.position}</strong>.</p><br><p>Salam hormat,</p><p><strong>${p.name || '-'}</strong><br>${p.phone || '-'}<br>${p.email || '-'}</p>`;
+                html = `<p><strong>Subject: Lamaran Pekerjaan - ${l.position} - ${p.name || 'Nama'}</strong></p><hr style="border:0; border-top:1px solid #ccc; margin: 10px 0;"><p>Yth. ${l.to} ${l.company},</p><br><p>Perkenalkan, nama saya ${p.name}. Bersama pesan ini, saya mengajukan lamaran untuk posisi <strong>${l.position}</strong>.</p><br><p>Hormat saya,</p><p><strong>${p.name || '-'}</strong><br>${p.phone || '-'}<br>${p.email || '-'}</p>`;
             } else if (l.template === 'handwritten') {
                 html = `<div class="tpl-handwritten"><div style="text-align:right;">${p.location || p.city || 'Kota'}, ${l.dateStr}</div><div>Kepada Yth.<br>${l.to}<br>${l.company}</div><br><div>Dengan hormat,</div><div>Saya yang bertanda tangan di bawah ini:</div><div style="margin-left: 20px;">Nama : ${p.name || '-'}<br>Alamat : ${p.address || '-'}<br>Pendidikan : ${p.edu || '-'}</div><div>Bermaksud melamar pekerjaan sebagai <strong>${l.position}</strong>.</div><br><br><div style="display: flex; justify-content: flex-end; margin-right: 50px;"><div style="text-align: center;">Hormat saya,<br>${sigHtml}${p.name || '-'}</div></div></div>`;
             }
@@ -921,7 +977,7 @@
 
         window.saveLetterData = async () => {
             if(!currentUser) return;
-            if(!activeProfile) return window.showToast("Profil kosong!", true);
+            if(!activeProfile) return window.showToast("Profil pelamar kosong!", true);
             if(!document.getElementById('letter-company').value || !document.getElementById('letter-position').value) {
                 return window.showToast("Lengkapi Nama Perusahaan dan Posisi.", true);
             }
@@ -955,7 +1011,6 @@
             }
         };
 
-        // --- MANAJEMEN ARSIP SURAT ---
         window.renderArchive = () => {
             const tbody = document.getElementById('archive-list');
             const search = document.getElementById('search-archive').value.toLowerCase();
@@ -967,7 +1022,7 @@
             );
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada surat tersimpan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada surat tersimpan di cloud.</td></tr>`;
                 return;
             }
 
@@ -980,7 +1035,7 @@
                     <td>
                         <button class="btn-primary" style="font-size:0.8rem; padding:5px 8px;" onclick="openLetter('${l.id}')">Buka</button>
                         <button class="btn-secondary" style="font-size:0.8rem; padding:5px 8px;" onclick="duplicateLetter('${l.id}')">Duplikat</button>
-                        <button class="btn-danger" style="font-size:0.8rem; padding:5px 8px;" onclick="deleteLetter('${l.id}')">Hapus</button>
+                        <button class="btn-danger" style="font-size:0.8rem; padding:5px 8px;" onclick="confirmDeleteLetter('${l.id}')">Hapus</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -991,7 +1046,7 @@
             const l = lettersData.find(x => x.id === id);
             if(!l) return;
             currentLetterId = l.id;
-            letterManuallyEdited = true; // Prevents generic inputs from overriding the saved raw HTML
+            letterManuallyEdited = true;
 
             document.getElementById('letter-template').value = l.template || 'formal';
             document.getElementById('letter-date').value = l.letterDate || '';
@@ -1001,9 +1056,8 @@
             document.getElementById('letter-position').value = l.position || '';
             document.getElementById('letter-source').value = l.source || '';
             
-            if(document.getElementById('setting-align')) document.getElementById('setting-align').value = l.textAlign || 'justify';
-            if(document.getElementById('setting-spacing')) document.getElementById('setting-spacing').value = l.lineHeight || '1.5';
-            
+            document.getElementById('setting-align').value = l.textAlign || 'justify';
+            document.getElementById('setting-spacing').value = l.lineHeight || '1.5';
             document.getElementById('letter-signature-select').value = l.sigId || '';
 
             document.getElementById('a4-preview').style.textAlign = l.textAlign || 'justify';
@@ -1018,28 +1072,27 @@
             const l = lettersData.find(x => x.id === id);
             if(!l) return;
             
-            // Remove id from object to let Firestore generate a new one
             const { id: oldId, ...newL } = l;
             newL.date = new Date().toISOString();
             newL.company = l.company + " (Salinan)";
             
             try {
                 await addDoc(getLettersRef(), newL);
-                window.showToast('Surat berhasil diduplikasi.');
-            } catch(e) { window.showToast('Gagal duplikasi.', true); }
+                window.showToast('Surat berhasil diduplikasi ke Cloud.');
+            } catch(e) { window.showToast('Gagal menduplikasi.', true); }
         };
 
-        window.deleteLetter = async (id) => {
-            if(!currentUser) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'letters', id));
-                window.showToast('Surat dihapus dari Cloud.');
-            } catch(e) { window.showToast('Gagal menghapus.', true); }
+        window.confirmDeleteLetter = (id) => {
+            window.showConfirmModal("Hapus Surat", "Surat lamaran ini akan dihapus permanen dari Cloud.", async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', systemAppId, 'users', currentUser.uid, 'letters', id));
+                    window.showToast('Surat berhasil dihapus dari Cloud.');
+                } catch(e) { window.showToast('Gagal menghapus.', true); }
+            });
         };
 
-        // --- AKSI LAINNYA ---
         window.printPDF = () => {
-            if(!activeProfile) return window.showToast("Profil kosong! Harap isi terlebih dahulu.", true);
+            if(!activeProfile) return window.showToast("Profil pelamar kosong!", true);
             window.print();
         };
 
@@ -1052,18 +1105,18 @@
             
             try {
                 document.execCommand('copy');
-                window.showToast('Teks berhasil disalin ke clipboard!');
+                window.showToast('Teks surat berhasil disalin!');
             } catch(err) {
                 window.showToast('Gagal menyalin teks.', true);
             }
             window.getSelection().removeAllRanges();
         };
 
-        // Inisiasi nilai tanggal hari ini
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('letter-date').valueAsDate = new Date();
+            const btn = document.getElementById('theme-toggle-btn');
+            if (btn) btn.innerHTML = savedTheme === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap';
         });
-
     </script>
 </body>
 </html>
